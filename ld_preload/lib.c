@@ -1,4 +1,3 @@
-#include <stdatomic.h>
 #include <stdbool.h>
 
 #define _GNU_SOURCE
@@ -10,7 +9,7 @@
 #include <ctype.h>
 
 
-atomic_flag init_flag = ATOMIC_FLAG_INIT;
+bool init_flag = false;
 
 static void* load_sym(char* symname, void* proxyfunc) {
     void *funcptr = dlsym(RTLD_NEXT, symname);
@@ -33,8 +32,9 @@ typedef size_t (*fread_t)(void*, size_t, size_t, FILE*);
 fread_t true_fread = NULL;
 
 void do_init(){
-    bool ret = atomic_flag_test_and_set(&init_flag);
-    if(ret){
+    bool ret = init_flag;
+    if(!ret){
+        init_flag = true;
         SETUP_SYM(fread);
     }
 }
