@@ -4,7 +4,7 @@ cat: cat.c
 	gcc $^ -o $@
 
 lib.so: lib.c
-	gcc -fPIC -shared -ldl $^ -o $@
+	gcc -fPIC -shared -ldl -std=c11 $^ -o $@
 
 inject: inject.c
 	gcc $^ -o $@
