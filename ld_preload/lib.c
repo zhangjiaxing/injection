@@ -16,9 +16,7 @@ struct hook_node {
 
 struct hook_node hook_head;
 
-
 static void* load_sym(const char *symname, void *proxyfunc) {
-
 	void *funcptr = dlsym(RTLD_NEXT, symname);
 	if(!funcptr) {
 		fprintf(stderr, "Cannot load symbol '%s' %s\n", symname, dlerror());
