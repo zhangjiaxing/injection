@@ -8,13 +8,13 @@
 #include <string.h>
 #include "list.h"
 
-struct hook_node {
+struct func_node {
     char *name;
     void *func;
     struct list_head list;
 };
 
-struct hook_node hook_head;
+struct func_node func_head;
 
 static void* load_sym(const char *symname, void *proxyfunc) {
 	void *funcptr = dlsym(RTLD_NEXT, symname);
@@ -42,8 +42,8 @@ fread_t true_fread = NULL;
 #define SETUP_SYM(X) do { setup_sym( #X, X); } while(0)
 
 void *get_sym(const char *name){
-    struct hook_node *cur;
-    list_for_each_entry(cur, &hook_head.list, list){
+    struct func_node *cur;
+    list_for_each_entry(cur, &func_head.list, list){
         if(strcmp(name, cur->name) == 0){
             return cur->func;
         }
@@ -53,29 +53,29 @@ void *get_sym(const char *name){
 
 
 void setup_sym(const char *name, void *proxyfunc){
-    struct hook_node *cur;
-    list_for_each_entry(cur, &hook_head.list, list){
+    struct func_node *cur;
+    list_for_each_entry(cur, &func_head.list, list){
         if(strcmp(name, cur->name) == 0){
             fprintf(stderr, "setup_sym error %s\n", name);
             exit(0);
         }
     }
 
-    struct hook_node *node = malloc(sizeof(*node));
+    struct func_node *node = malloc(sizeof(*node));
     if(node == NULL){
         fprintf(stdout, "malloc error\n");
     }
     node->name = strdup(name);
     node->func = load_sym(name, proxyfunc);
     INIT_LIST_HEAD(&node->list);
-    list_add_tail(&node->list, &hook_head.list);
+    list_add_tail(&node->list, &func_head.list);
 }
 
 void do_init(){
     static atomic_flag init_flag = ATOMIC_FLAG_INIT;
     if(! atomic_flag_test_and_set(&init_flag)){
 
-        INIT_LIST_HEAD(&hook_head.list);
+        INIT_LIST_HEAD(&func_head.list);
 		SETUP_SYM(fread);
 	}
 }
