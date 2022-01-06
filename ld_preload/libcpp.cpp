@@ -6,6 +6,8 @@
 #include <iostream>
 #include <cstdio>
 #include <QPainter>
+#include <QPaintDevice>
+#include <QPaintEngine>
 
 
 static void print_mem(const void *base, int size){
@@ -28,7 +30,11 @@ void QPainter::drawPixmap(const QPointF &point, const QPixmap &pixmap)
         memcpy(&origin_drawpixmap, &tmpPtr, sizeof(tmpPtr));
     }
 
-    std::cerr << __func__ << ": in hook\n";
+    QPaintDevice *device = this->device();
+    std::cerr << __func__ << ": in hook size: " << device->width() << "*" << device->height() <<std::endl;
+    QPaintEngine *engine = this->paintEngine();
+    std::cerr << "Class Type: " << engine->type() << std::endl;
+
     return (this->*origin_drawpixmap)(point, pixmap);
 }
 
